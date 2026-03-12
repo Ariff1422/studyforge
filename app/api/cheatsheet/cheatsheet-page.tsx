@@ -1,9 +1,6 @@
 "use client";
 import { useState, useCallback } from "react";
 import Link from "next/link";
-import * as pdfjs from "pdfjs-dist";
-// Use unpkg over HTTPS to prevent Turbopack/CORS dynamic import errors
-pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 type CheatItem = { term: string; definition: string; note?: string };
 type CheatSection = { heading: string; type: string; items: CheatItem[] };
@@ -35,20 +32,6 @@ export default function CheatsheetPage() {
     await processFiles(Array.from(e.dataTransfer.files));
   }, []);
 
-  const extractTextFromPDF = async (file: File): Promise<string> => {
-    const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-    let fullText = `\n\n=== ${file.name} ===\n`;
-
-    for (let i = 1; i <= pdf.numPages; i++) {
-      const page = await pdf.getPage(i);
-      const content = await page.getTextContent();
-      const strings = content.items.map((item: any) => item.str);
-      fullText += strings.join(" ") + "\n";
-    }
-    return fullText;
-  };
-
   const processFiles = async (files: File[]) => {
     const names: string[] = [];
     let combined = "";
@@ -57,18 +40,10 @@ export default function CheatsheetPage() {
       if (
         file.type === "text/plain" ||
         file.name.endsWith(".md") ||
-        file.name.endsWith(".txt")
+        file.name.endsWith(".txt") ||
+        file.name.endsWith(".csv")
       ) {
         combined += `\n\n=== ${file.name} ===\n` + (await file.text());
-      } else if (file.type === "application/pdf") {
-        try {
-          combined += await extractTextFromPDF(file);
-        } catch (err) {
-          console.error("PDF extraction failed", err);
-          combined += `\n\n[Error extracting ${file.name}]`;
-        }
-      } else {
-        combined += `\n\n[File uploaded: ${file.name} — paste text content below if PDF extraction failed]`;
       }
     }
     setFileNames((prev) => [...prev, ...names]);
@@ -262,8 +237,7 @@ export default function CheatsheetPage() {
                     marginBottom: 8,
                   }}
                 >
-                  {/* 1. Update label to include PDF */}
-                  UPLOAD FILES (TXT, MD, PDF)
+                  UPLOAD FILES
                 </label>
                 <div
                   onDragOver={(e) => {
@@ -289,16 +263,14 @@ export default function CheatsheetPage() {
                     id="file-input"
                     type="file"
                     multiple
-                    /* 2. Update accept attribute to include .pdf */
-                    accept=".txt,.md,.csv,.pdf"
+                    accept=".txt,.md,.csv"
                     onChange={(e) =>
                       e.target.files && processFiles(Array.from(e.target.files))
                     }
                     style={{ display: "none" }}
                   />
-                  {/* 3. Optional: Update the helpful text inside the dropzone */}
                   <p style={{ color: "var(--text-secondary)", fontSize: 14 }}>
-                    Drop files here or click to upload
+                    Drop files or click to upload
                   </p>
                   <p
                     style={{
@@ -308,15 +280,15 @@ export default function CheatsheetPage() {
                       marginTop: 4,
                     }}
                   >
-                    TXT · MD · CSV · PDF
+                    TXT · MD · CSV
                   </p>
                   {fileNames.length > 0 && (
                     <div
                       style={{
-                        marginTop: 12,
+                        marginTop: 10,
                         display: "flex",
                         flexWrap: "wrap",
-                        gap: 8,
+                        gap: 6,
                         justifyContent: "center",
                       }}
                     >
@@ -327,7 +299,7 @@ export default function CheatsheetPage() {
                             background: "rgba(74,222,128,0.1)",
                             color: "#4ade80",
                             borderRadius: 6,
-                            padding: "4px 10px",
+                            padding: "3px 10px",
                             fontFamily: "var(--font-mono)",
                             fontSize: 11,
                           }}
@@ -339,6 +311,7 @@ export default function CheatsheetPage() {
                   )}
                 </div>
               </div>
+
               <Field
                 label="PASTE SOURCE MATERIAL"
                 hint={`${sourceText.length.toLocaleString()} / 50,000 chars`}

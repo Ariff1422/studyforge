@@ -86,7 +86,7 @@ export default function Home() {
               }}>actually look good.</span>
             </h1>
             <p style={{ fontFamily: "var(--font-display)", fontSize: 18, color: "var(--text-secondary)", maxWidth: 480, lineHeight: 1.6 }}>
-              Slides, cheatsheets, and posters powered by Gemini Flash. Grounded on your content. Designer quality, zero cost.
+              Slides, cheatsheets, and posters powered by Gemini 2.5 Flash + Claude Haiku. Grounded on your content. Designer quality, zero cost.
             </p>
           </div>
         </header>
@@ -150,7 +150,7 @@ export default function Home() {
         {/* Footer */}
         <footer style={{ borderTop: "1px solid var(--border)", paddingTop: 24, paddingBottom: 40, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
-            POWERED BY GEMINI 2.0 FLASH — FREE TIER
+            GEMINI 2.5 FLASH + CLAUDE HAIKU
           </span>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--text-muted)" }}>
             STUDYFORGE v0.1
